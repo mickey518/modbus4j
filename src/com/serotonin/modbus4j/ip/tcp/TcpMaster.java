@@ -25,8 +25,6 @@ import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.serotonin.modbus4j.ModbusMaster;
 import com.serotonin.modbus4j.base.BaseMessageParser;
@@ -48,6 +46,8 @@ import com.serotonin.modbus4j.sero.messaging.OutgoingRequestMessage;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
 import com.serotonin.modbus4j.sero.messaging.Transport;
 import com.serotonin.modbus4j.sero.messaging.WaitingRoomKeyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>TcpMaster class.</p>
@@ -58,7 +58,7 @@ import com.serotonin.modbus4j.sero.messaging.WaitingRoomKeyFactory;
 public class TcpMaster extends ModbusMaster {
 
     // Configuration fields.
-    private final Log LOG = LogFactory.getLog(TcpMaster.class);
+    private final Logger LOG = LoggerFactory.getLogger(TcpMaster.class);
     private short nextTransactionId = 0;
     private final IpParameters ipParameters;
     private final boolean keepAlive;

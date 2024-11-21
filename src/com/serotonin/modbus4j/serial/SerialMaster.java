@@ -20,15 +20,14 @@
  */
 package com.serotonin.modbus4j.serial;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.serotonin.modbus4j.ModbusMaster;
 import com.serotonin.modbus4j.exception.ModbusInitException;
 import com.serotonin.modbus4j.sero.messaging.EpollStreamTransport;
 import com.serotonin.modbus4j.sero.messaging.MessageControl;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
 import com.serotonin.modbus4j.sero.messaging.Transport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Abstract SerialMaster class.</p>
@@ -41,7 +40,7 @@ abstract public class SerialMaster extends ModbusMaster {
     private static final int RETRY_PAUSE_START = 50;
     private static final int RETRY_PAUSE_MAX = 1000;
 
-    private final Log LOG = LogFactory.getLog(SerialMaster.class);
+    private final Logger LOG = LoggerFactory.getLogger(SerialMaster.class);
 
     // Runtime fields.
     protected boolean serialPortOpen;

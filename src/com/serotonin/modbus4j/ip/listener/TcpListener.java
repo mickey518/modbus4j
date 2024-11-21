@@ -31,8 +31,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.serotonin.modbus4j.ModbusMaster;
 import com.serotonin.modbus4j.base.BaseMessageParser;
@@ -54,6 +52,8 @@ import com.serotonin.modbus4j.sero.messaging.OutgoingRequestMessage;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
 import com.serotonin.modbus4j.sero.messaging.Transport;
 import com.serotonin.modbus4j.sero.messaging.WaitingRoomKeyFactory;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>TcpListener class.</p>
@@ -63,7 +63,7 @@ import com.serotonin.modbus4j.sero.messaging.WaitingRoomKeyFactory;
  */
 public class TcpListener extends ModbusMaster {
     // Configuration fields.
-    private final Log LOG = LogFactory.getLog(TcpListener.class);
+    private final Logger LOG = LoggerFactory.getLogger(TcpListener.class);
     private short nextTransactionId = 0;
     private short retries = 0;
     private final IpParameters ipParameters;
@@ -215,7 +215,7 @@ public class TcpListener extends ModbusMaster {
         IpMessageResponse ipResponse;
         try {
             // Send data via handler!
-            handler.conn.DEBUG = true;
+//            handler.conn.DEBUG = true;
             ipResponse = (IpMessageResponse) handler.conn.send(ipRequest);
             if (ipResponse == null) {
                 throw new ModbusTransportException(new Exception("No valid response from slave!"), request.getSlaveId());
@@ -353,7 +353,7 @@ public class TcpListener extends ModbusMaster {
 
             conn = getMessageControl();
             conn.setExceptionHandler(getExceptionHandler());
-            conn.DEBUG = true;
+//            conn.DEBUG = true;
             conn.start(transport, ipMessageParser, null, waitingRoomKeyFactory);
             if (getePoll() == null)
                 ((StreamTransport) transport).start("Modbus4J TcpMaster");

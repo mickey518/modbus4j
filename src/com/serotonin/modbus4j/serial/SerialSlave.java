@@ -20,12 +20,11 @@
  */
 package com.serotonin.modbus4j.serial;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
-
 import com.serotonin.modbus4j.ModbusSlaveSet;
 import com.serotonin.modbus4j.exception.ModbusInitException;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Abstract SerialSlave class.</p>
@@ -35,7 +34,7 @@ import com.serotonin.modbus4j.sero.messaging.StreamTransport;
  */
 abstract public class SerialSlave extends ModbusSlaveSet {
 
-	private final Log LOG = LogFactory.getLog(SerialSlave.class);
+	private final Logger LOG = LoggerFactory.getLogger(SerialSlave.class);
 	
     // Runtime fields
     private SerialPortWrapper wrapper;

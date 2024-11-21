@@ -7,6 +7,8 @@ import com.serotonin.modbus4j.sero.log.BaseIOLog;
 import com.serotonin.modbus4j.sero.timer.SystemTimeSource;
 import com.serotonin.modbus4j.sero.timer.TimeSource;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * In general there are three messaging activities:
@@ -23,8 +25,8 @@ public class MessageControl implements DataConsumer {
     private static int DEFAULT_RETRIES = 2;
     private static int DEFAULT_TIMEOUT = 500;
 
-    public boolean DEBUG = false;
-
+    //    public boolean DEBUG = true;
+    private final Logger log = LoggerFactory.getLogger(MessageControl.class);
     private Transport transport;
     private MessageParser messageParser;
     private RequestHandler requestHandler;
@@ -44,14 +46,14 @@ public class MessageControl implements DataConsumer {
     /**
      * <p>start.</p>
      *
-     * @param transport a {@link com.serotonin.modbus4j.sero.messaging.Transport} object.
-     * @param messageParser a {@link com.serotonin.modbus4j.sero.messaging.MessageParser} object.
-     * @param handler a {@link com.serotonin.modbus4j.sero.messaging.RequestHandler} object.
+     * @param transport             a {@link com.serotonin.modbus4j.sero.messaging.Transport} object.
+     * @param messageParser         a {@link com.serotonin.modbus4j.sero.messaging.MessageParser} object.
+     * @param handler               a {@link com.serotonin.modbus4j.sero.messaging.RequestHandler} object.
      * @param waitingRoomKeyFactory a {@link com.serotonin.modbus4j.sero.messaging.WaitingRoomKeyFactory} object.
      * @throws java.io.IOException if any.
      */
     public void start(Transport transport, MessageParser messageParser, RequestHandler handler,
-            WaitingRoomKeyFactory waitingRoomKeyFactory) throws IOException {
+                      WaitingRoomKeyFactory waitingRoomKeyFactory) throws IOException {
         this.transport = transport;
         this.messageParser = messageParser;
         this.requestHandler = handler;
@@ -191,8 +193,8 @@ public class MessageControl implements DataConsumer {
      */
     public IncomingResponseMessage send(OutgoingRequestMessage request, int timeout, int retries) throws IOException {
         byte[] data = request.getMessageData();
-        if (DEBUG)
-            System.out.println("MessagingControl.send: " + StreamUtils.dumpHex(data));
+        if (log.isDebugEnabled())
+            log.debug("MessagingControl.send: {}", StreamUtils.dumpHex(data));
 
         IncomingResponseMessage response = null;
 
@@ -210,20 +212,18 @@ public class MessageControl implements DataConsumer {
                     // Wait for the response.
                     response = waitingRoom.getResponse(key, timeout);
 
-                    if (DEBUG && response == null)
-                        System.out.println("Timeout waiting for response");
+                    if (log.isDebugEnabled() && response == null)
+                        log.debug("Timeout waiting for response");
                 }
                 while (response == null && retries-- > 0);
-            }
-            finally {
+            } finally {
                 // Leave the waiting room.
                 waitingRoom.leave(key);
             }
 
             if (response == null)
                 throw new TimeoutException("request=" + request);
-        }
-        else
+        } else
             write(data);
 
         return response;
@@ -241,12 +241,12 @@ public class MessageControl implements DataConsumer {
 
     /**
      * {@inheritDoc}
-     *
+     * <p>
      * Incoming data from the transport. Single-threaded.
      */
     public void data(byte[] b, int len) {
-        if (DEBUG)
-            System.out.println("MessagingConnection.read: " + StreamUtils.dumpHex(b, 0, len));
+        if (log.isDebugEnabled())
+            log.debug("MessagingConnection.read: {}", StreamUtils.dumpHex(b, 0, len));
         if (ioLog != null)
             ioLog.input(b, 0, len);
 
@@ -284,15 +284,13 @@ public class MessageControl implements DataConsumer {
                         if (response != null)
                             send(response);
                     }
-                }
-                else
+                } else
                     // Must be a response. Give it to the waiting room.
                     waitingRoom.response((IncomingResponseMessage) message);
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 exceptionHandler.receivedException(e);
                 // Clear the buffer
-                //                dataBuffer.clear();
+                dataBuffer.clear();
             }
         }
     }
@@ -306,7 +304,9 @@ public class MessageControl implements DataConsumer {
         }
     }
 
-    /** {@inheritDoc} */
+    /**
+     * {@inheritDoc}
+     */
     public void handleIOException(IOException e) {
         exceptionHandler.receivedException(e);
     }

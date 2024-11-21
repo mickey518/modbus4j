@@ -20,8 +20,6 @@
  */
 package com.serotonin.modbus4j.serial.rtu;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.serotonin.modbus4j.exception.ModbusInitException;
 import com.serotonin.modbus4j.exception.ModbusTransportException;
@@ -33,6 +31,8 @@ import com.serotonin.modbus4j.serial.SerialWaitingRoomKeyFactory;
 import com.serotonin.modbus4j.sero.ShouldNeverHappenException;
 import com.serotonin.modbus4j.sero.messaging.MessageControl;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>RtuMaster class.</p>
@@ -42,7 +42,7 @@ import com.serotonin.modbus4j.sero.messaging.StreamTransport;
  */
 public class RtuMaster extends SerialMaster {
 
-    private final Log LOG = LogFactory.getLog(RtuMaster.class);
+    private final Logger LOG = LoggerFactory.getLogger(RtuMaster.class);
 
     // Runtime fields.
     private MessageControl conn;

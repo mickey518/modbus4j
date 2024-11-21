@@ -11,11 +11,11 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-import org.apache.commons.logging.Log;
-import org.apache.commons.logging.LogFactory;
 
 import com.serotonin.modbus4j.sero.io.NullWriter;
 import com.serotonin.modbus4j.sero.io.StreamUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * <p>Abstract BaseIOLog class.</p>
@@ -25,7 +25,7 @@ import com.serotonin.modbus4j.sero.io.StreamUtils;
  */
 public abstract class BaseIOLog {
     
-	private static final Log LOG = LogFactory.getLog(BaseIOLog.class);
+	private static final Logger LOG = LoggerFactory.getLogger(BaseIOLog.class);
 	
 	/** Constant <code>DATE_FORMAT="yyyy/MM/dd-HH:mm:ss,SSS"</code> */
 	protected static final String DATE_FORMAT = "yyyy/MM/dd-HH:mm:ss,SSS";
