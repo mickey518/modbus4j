@@ -289,7 +289,7 @@ public class MessageControl implements DataConsumer {
                     waitingRoom.response((IncomingResponseMessage) message);
             } catch (Exception e) {
                 exceptionHandler.receivedException(e);
-                // Clear the buffer
+                // Clear the buffer 这里之前是注释掉的
                 dataBuffer.clear();
             }
         }
