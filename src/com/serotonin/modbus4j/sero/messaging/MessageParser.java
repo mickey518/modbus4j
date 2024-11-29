@@ -1,5 +1,6 @@
 package com.serotonin.modbus4j.sero.messaging;
 
+import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
 
 /**
@@ -25,5 +26,5 @@ public interface MessageParser {
      *             if the data in the queue is sufficient to construct a message, but the message data is invalid, this
      *             method must throw an exception, or it will keep getting the same data.
      */
-    IncomingMessage parseMessage(ByteQueue queue) throws Exception;
+    IncomingMessage parseMessage(ByteQueue queue) throws ModbusTransportException;
 }

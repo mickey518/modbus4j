@@ -31,6 +31,7 @@ import com.serotonin.modbus4j.serial.SerialWaitingRoomKeyFactory;
 import com.serotonin.modbus4j.sero.ShouldNeverHappenException;
 import com.serotonin.modbus4j.sero.messaging.MessageControl;
 import com.serotonin.modbus4j.sero.messaging.StreamTransport;
+import com.serotonin.modbus4j.sero.messaging.TimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class RtuMaster extends SerialMaster {
 
     /**
      * <p>Constructor for RtuMaster.</p>
-     *
+     * <p>
      * Default to validating the slave id in responses
      *
      * @param wrapper a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
@@ -61,93 +62,29 @@ public class RtuMaster extends SerialMaster {
     /**
      * <p>Constructor for RtuMaster.</p>
      *
-     * @param wrapper a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
+     * @param wrapper          a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
      * @param validateResponse - confirm that requested slave id is the same in the response
      */
     public RtuMaster(SerialPortWrapper wrapper, boolean validateResponse) {
         super(wrapper, validateResponse);
     }
 
-    /** {@inheritDoc} */
-    @Override
-    public void init() throws ModbusInitException {
-        try {
-            openConnection(null);
-        }
-        catch (Exception e) {
-            throw new ModbusInitException(e);
-        }
-        initialized = true;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    protected void openConnection(MessageControl toClose) throws Exception {
-        super.openConnection(toClose);
-
-        RtuMessageParser rtuMessageParser = new RtuMessageParser(true);
-        this.conn = getMessageControl();
-        this.conn.start(transport, rtuMessageParser, null, new SerialWaitingRoomKeyFactory());
-        if (getePoll() == null) {
-            ((StreamTransport) transport).start("Modbus RTU master");
-        }
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public void destroy() {
-        closeMessageControl(conn);
-        super.close();
-        initialized = false;
-    }
-
-    /** {@inheritDoc} */
-    @Override
-    public ModbusResponse sendImpl(ModbusRequest request) throws ModbusTransportException {
-        // Wrap the modbus request in an rtu request.
-        RtuMessageRequest rtuRequest = new RtuMessageRequest(request);
-
-        // Send the request to get the response.
-        RtuMessageResponse rtuResponse;
-        try {
-            rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
-            if (rtuResponse == null)
-                return null;
-            return rtuResponse.getModbusResponse();
-        }
-        catch (Exception e) {
-            try {
-                LOG.debug("Connection may have been reset. Attempting to re-open.");
-                openConnection(conn);
-                rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
-                if (rtuResponse == null)
-                    return null;
-                return rtuResponse.getModbusResponse();
-            }catch(Exception e2) {
-                closeConnection(conn);
-                LOG.debug("Failed to re-connect", e);
-                throw new ModbusTransportException(e2, request.getSlaveId());
-            }
-        }
-    }
-
     /**
      * RTU Spec:
      * For baud greater than 19200
      * Message Spacing: 1.750uS
-     *
+     * <p>
      * For baud less than 19200
      * Message Spacing: 3.5 * char time
      *
      * @param wrapper a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
      * @return a long.
      */
-    public static long computeMessageFrameSpacing(SerialPortWrapper wrapper){
+    public static long computeMessageFrameSpacing(SerialPortWrapper wrapper) {
         //For Modbus Serial Spec, Message Framing rates at 19200 Baud are fixed
         if (wrapper.getBaudRate() > 19200) {
             return 1750000l; //Nanoseconds
-        }
-        else {
+        } else {
             float charTime = computeCharacterTime(wrapper);
             return (long) (charTime * 3.5f);
         }
@@ -157,42 +94,40 @@ public class RtuMaster extends SerialMaster {
      * RTU Spec:
      * For baud greater than 19200
      * Char Spacing: 750uS
-     *
+     * <p>
      * For baud less than 19200
      * Char Spacing: 1.5 * char time
      *
      * @param wrapper a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
      * @return a long.
      */
-    public static long computeCharacterSpacing(SerialPortWrapper wrapper){
+    public static long computeCharacterSpacing(SerialPortWrapper wrapper) {
         //For Modbus Serial Spec, Message Framing rates at 19200 Baud are fixed
         if (wrapper.getBaudRate() > 19200) {
             return 750000l; //Nanoseconds
-        }
-        else {
+        } else {
             float charTime = computeCharacterTime(wrapper);
             return (long) (charTime * 1.5f);
         }
     }
 
-
     /**
      * Compute the time it takes to transmit 1 character with
      * the provided Serial Parameters.
-     *
+     * <p>
      * RTU Spec:
      * For baud greater than 19200
      * Char Spacing: 750uS
      * Message Spacing: 1.750uS
-     *
+     * <p>
      * For baud less than 19200
      * Char Spacing: 1.5 * char time
      * Message Spacing: 3.5 * char time
      *
-     * @return time in nanoseconds
      * @param wrapper a {@link com.serotonin.modbus4j.serial.SerialPortWrapper} object.
+     * @return time in nanoseconds
      */
-    public static float computeCharacterTime(SerialPortWrapper wrapper){
+    public static float computeCharacterTime(SerialPortWrapper wrapper) {
         //Compute the char size
         float charBits = wrapper.getDataBits();
         switch (wrapper.getStopBits()) {
@@ -216,5 +151,77 @@ public class RtuMaster extends SerialMaster {
         //Compute ns it takes to send one char
         // ((charSize/symbols per second) ) * ns per second
         return (charBits / wrapper.getBaudRate()) * 1000000000f;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void init() throws ModbusInitException {
+        try {
+            openConnection(null);
+        } catch (Exception e) {
+            throw new ModbusInitException(e);
+        }
+        initialized = true;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    protected void openConnection(MessageControl toClose) throws Exception {
+        super.openConnection(toClose);
+
+        RtuMessageParser rtuMessageParser = new RtuMessageParser(true);
+        this.conn = getMessageControl();
+        this.conn.start(transport, rtuMessageParser, null, new SerialWaitingRoomKeyFactory());
+        if (getePoll() == null) {
+            ((StreamTransport) transport).start("Modbus RTU master");
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public void destroy() {
+        closeMessageControl(conn);
+        super.close();
+        initialized = false;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public ModbusResponse sendImpl(ModbusRequest request) throws ModbusTransportException {
+        // Wrap the modbus request in an rtu request.
+        RtuMessageRequest rtuRequest = new RtuMessageRequest(request);
+
+        // Send the request to get the response.
+        RtuMessageResponse rtuResponse;
+        try {
+            rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
+            if (rtuResponse == null)
+                return null;
+            return rtuResponse.getModbusResponse();
+        } catch (Exception e) {
+            try {
+                LOG.debug("Connection may have been reset. Attempting to re-open.");
+                openConnection(conn);
+                rtuResponse = (RtuMessageResponse) conn.send(rtuRequest);
+                if (rtuResponse == null)
+                    return null;
+                return rtuResponse.getModbusResponse();
+            } catch (TimeoutException timeoutException) {
+                LOG.error(timeoutException.getMessage(), timeoutException);
+                return null;
+            } catch (Exception e2) {
+                closeConnection(conn);
+                LOG.debug("Failed to re-connect", e);
+                throw new ModbusTransportException(e2, request.getSlaveId());
+            }
+        }
     }
 }

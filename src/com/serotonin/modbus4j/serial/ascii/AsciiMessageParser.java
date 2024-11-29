@@ -21,6 +21,7 @@
 package com.serotonin.modbus4j.serial.ascii;
 
 import com.serotonin.modbus4j.base.BaseMessageParser;
+import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.sero.messaging.IncomingMessage;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
 
@@ -42,7 +43,7 @@ public class AsciiMessageParser extends BaseMessageParser {
 
     /** {@inheritDoc} */
     @Override
-    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws Exception {
+    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws ModbusTransportException {
         if (master)
             return AsciiMessageResponse.createAsciiMessageResponse(queue);
         return AsciiMessageRequest.createAsciiMessageRequest(queue);

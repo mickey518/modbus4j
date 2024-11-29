@@ -21,6 +21,7 @@
 package com.serotonin.modbus4j.serial.rtu;
 
 import com.serotonin.modbus4j.base.BaseMessageParser;
+import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.sero.messaging.IncomingMessage;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
 
@@ -43,7 +44,7 @@ public class RtuMessageParser extends BaseMessageParser {
 
     /** {@inheritDoc} */
     @Override
-    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws Exception {
+    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws ModbusTransportException {
         if (master)
             return RtuMessageResponse.createRtuMessageResponse(queue);
         return RtuMessageRequest.createRtuMessageRequest(queue);

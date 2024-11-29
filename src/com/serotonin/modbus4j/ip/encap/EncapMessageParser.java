@@ -21,6 +21,7 @@
 package com.serotonin.modbus4j.ip.encap;
 
 import com.serotonin.modbus4j.base.BaseMessageParser;
+import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.sero.messaging.IncomingMessage;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
 
@@ -42,7 +43,7 @@ public class EncapMessageParser extends BaseMessageParser {
 
     /** {@inheritDoc} */
     @Override
-    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws Exception {
+    protected IncomingMessage parseMessageImpl(ByteQueue queue) throws ModbusTransportException {
         if (master)
             return EncapMessageResponse.createEncapMessageResponse(queue);
         return EncapMessageRequest.createEncapMessageRequest(queue);

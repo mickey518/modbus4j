@@ -20,6 +20,7 @@
  */
 package com.serotonin.modbus4j.base;
 
+import com.serotonin.modbus4j.exception.ModbusTransportException;
 import com.serotonin.modbus4j.sero.messaging.IncomingMessage;
 import com.serotonin.modbus4j.sero.messaging.MessageParser;
 import com.serotonin.modbus4j.sero.util.queue.ByteQueue;
@@ -44,7 +45,7 @@ abstract public class BaseMessageParser implements MessageParser {
 
     /** {@inheritDoc} */
     @Override
-    public IncomingMessage parseMessage(ByteQueue queue) throws Exception {
+    public IncomingMessage parseMessage(ByteQueue queue) throws ModbusTransportException {
         try {
             return parseMessageImpl(queue);
         }
@@ -61,5 +62,5 @@ abstract public class BaseMessageParser implements MessageParser {
      * @return a {@link com.serotonin.modbus4j.sero.messaging.IncomingMessage} object.
      * @throws java.lang.Exception if any.
      */
-    abstract protected IncomingMessage parseMessageImpl(ByteQueue queue) throws Exception;
+    abstract protected IncomingMessage parseMessageImpl(ByteQueue queue) throws ModbusTransportException;
 }
