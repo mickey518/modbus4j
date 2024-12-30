@@ -193,8 +193,8 @@ public class MessageControl implements DataConsumer {
      */
     public IncomingResponseMessage send(OutgoingRequestMessage request, int timeout, int retries) throws IOException {
         byte[] data = request.getMessageData();
-        if (log.isDebugEnabled())
-            log.debug("MessagingControl.send: {}", StreamUtils.dumpHex(data));
+//        if (log.isDebugEnabled())
+            log.info("MessagingControl.send: {}", StreamUtils.dumpHex(data));
 
         IncomingResponseMessage response = null;
 
